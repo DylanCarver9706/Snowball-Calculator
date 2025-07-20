@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 import { Bill } from "@/lib/types";
 import { calculateSnowball } from "@/lib/snowball-calculator";
 import { Input } from "@/components/ui/input";
@@ -30,110 +31,57 @@ function getDefaultBill(): Bill {
 }
 
 export function SnowballCalculator() {
+  const { user, isLoaded } = useUser();
   const [monthlyContribution, setMonthlyContribution] = useState(100);
-  const [bills, setBills] = useState<Bill[]>([
-    {
-      name: "Ascent Funding School Loan",
-      interestRate: 13.25,
-      monthlyPayment: 755,
-      currentBalance: 7140.74,
-    },
-    {
-      name: "Capital One Quicksilver Credit Card",
-      interestRate: 29.24,
-      monthlyPayment: 50,
-      currentBalance: 444.7,
-    },
-    {
-      name: "Dylan Mercy Debt",
-      interestRate: 0,
-      monthlyPayment: 35,
-      currentBalance: 232.5,
-    },
-    {
-      name: "Kristen Mercy Urgent Care Debt",
-      interestRate: 0,
-      monthlyPayment: 35,
-      currentBalance: 15,
-    },
-    {
-      name: "Kristen Mercy Debt",
-      interestRate: 0,
-      monthlyPayment: 35,
-      currentBalance: 730,
-    },
-    {
-      name: "Commerce Credit Card",
-      interestRate: 27.49,
-      monthlyPayment: 50,
-      currentBalance: 414.16,
-    },
-    {
-      name: "Capital One Secured Credit Card",
-      interestRate: 29.49,
-      monthlyPayment: 50,
-      currentBalance: 470.77,
-    },
-    {
-      name: "Sheffield Financial Trailer Loan",
-      interestRate: 12.24,
-      monthlyPayment: 197.39,
-      currentBalance: 2594.08,
-    },
-    {
-      name: "Kristen Student Loan",
-      interestRate: 4.99,
-      monthlyPayment: 50.38,
-      currentBalance: 3635.04,
-    },
-    {
-      name: "Red Rocker Car Loan",
-      interestRate: 18.14,
-      monthlyPayment: 317.48,
-      currentBalance: 11900.49,
-    },
-    {
-      name: "Credit One Credit Card",
-      interestRate: 28.24,
-      monthlyPayment: 65,
-      currentBalance: 1036.33,
-    },
-    {
-      name: "Dylan MoBap Student Loan",
-      interestRate: 0,
-      monthlyPayment: 125.71,
-      currentBalance: 1131.37,
-    },
-    {
-      name: "Wedding Credit Card",
-      interestRate: 0,
-      monthlyPayment: 150,
-      currentBalance: 14682.97,
-    },
-    {
-      name: "Dylan Federal Student Loan",
-      interestRate: 3.73,
-      monthlyPayment: 52.75,
-      currentBalance: 1655.01,
-    },
-    {
-      name: "Shane Co. Credit Card",
-      interestRate: 9.99,
-      monthlyPayment: 127,
-      currentBalance: 2194.98,
-    },
-    {
-      name: "Subaru Car Loan",
-      interestRate: 4.84,
-      monthlyPayment: 500,
-      currentBalance: 14606.05,
-    },
-  ]);
+  const [bills, setBills] = useState<Bill[]>([]);
   const [editing, setEditing] = useState(false);
   const [editBills, setEditBills] = useState<Bill[] | null>(null);
   const [editMonthlyContribution, setEditMonthlyContribution] = useState<
     number | null
   >(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load data from Clerk metadata on component mount
+  useEffect(() => {
+    if (isLoaded && user) {
+      const metadata = user.publicMetadata as any;
+
+      if (metadata.monthlyContribution && metadata.bills) {
+        setMonthlyContribution(metadata.monthlyContribution);
+        setBills(metadata.bills);
+      }
+      setIsLoading(false);
+    }
+  }, [isLoaded, user]);
+
+  // Function to save data to Clerk metadata
+  const saveToMetadata = async (
+    newBills: Bill[],
+    newMonthlyContribution: number
+  ) => {
+    if (!user) return;
+
+    try {
+      const response = await fetch("/api/update-user-metadata", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          metadata: {
+            monthlyContribution: newMonthlyContribution,
+            bills: newBills,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save data");
+      }
+    } catch (error) {
+      console.error("Error saving to metadata:", error);
+    }
+  };
 
   const handleBillChange = (
     index: number,
@@ -171,13 +119,17 @@ export function SnowballCalculator() {
     setEditMonthlyContribution(null);
     setEditing(false);
   };
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (editBills && editMonthlyContribution !== null) {
       const sortedEditBills = [...editBills].sort(
         (a, b) => a.currentBalance - b.currentBalance
       );
       setBills(sortedEditBills);
       setMonthlyContribution(editMonthlyContribution);
+
+      // Save to metadata
+      await saveToMetadata(sortedEditBills, editMonthlyContribution);
+
       const newCalc = calculateSnowball(
         sortedEditBills,
         editMonthlyContribution
@@ -211,9 +163,7 @@ export function SnowballCalculator() {
     });
   };
   const handleEditAddBill = () => {
-    setEditBills((prev) =>
-      prev ? [...prev, getDefaultBill()] : prev
-    );
+    setEditBills((prev) => (prev ? [...prev, getDefaultBill()] : prev));
   };
 
   // Sort by balance (ascending) before calculation
@@ -226,6 +176,22 @@ export function SnowballCalculator() {
   const [maxMonths, setMaxMonths] = useState(() =>
     Math.max(...calculation.map((debt) => debt.months.length))
   );
+
+  // Update calculation when bills or monthlyContribution changes
+  useEffect(() => {
+    if (bills.length > 0) {
+      const sortedBills = [...bills].sort(
+        (a, b) => a.currentBalance - b.currentBalance
+      );
+      const newCalc = calculateSnowball(sortedBills, monthlyContribution);
+      setCalculation(newCalc);
+      setMaxMonths(Math.max(...newCalc.map((debt) => debt.months.length)));
+    }
+  }, [bills, monthlyContribution]);
+
+  if (isLoading) {
+    return <div className="w-full text-center py-8">Loading...</div>;
+  }
 
   return (
     <div className="w-full">
