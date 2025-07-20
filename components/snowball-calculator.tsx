@@ -40,7 +40,6 @@ export function SnowballCalculator() {
     number | null
   >(null);
   const [isLoading, setIsLoading] = useState(true);
-
   // Load data from Clerk metadata on component mount
   useEffect(() => {
     if (isLoaded && user) {
