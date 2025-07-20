@@ -6,6 +6,7 @@ import { Elements } from '@stripe/react-stripe-js'
 
 import VerificationForm from './VerificationForm'
 import SignUpForm from './SignUpForm'
+import { SignUp } from '@clerk/nextjs'
 
 
 const SignUpPage = () => {
@@ -21,7 +22,8 @@ const SignUpPage = () => {
     <div className='mt-20 flex items-center justify-center'>
       {/* @ts-ignore */}
       <Elements stripe={stripePromise}>
-        <SignUpForm setVerifying={setVerifying} />
+        {/* <SignUpForm setVerifying={setVerifying} /> */}
+        <SignUp />
       </Elements>
     </div>
   )

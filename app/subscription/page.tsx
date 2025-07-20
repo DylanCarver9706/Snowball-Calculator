@@ -278,7 +278,7 @@ export default function SubscriptionPage() {
             Your Subscription
           </h1>
           <p className="text-xl text-gray-600">
-            Manage your PDF Utility subscription and billing details
+            Manage your Snowball Calculator subscription and billing details
           </p>
         </div>
         {subscriptionCard}

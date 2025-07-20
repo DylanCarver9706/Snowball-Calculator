@@ -23,7 +23,7 @@ function NotFoundContent() {
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             Don&apos;t worry! You can head back to our homepage and explore our
-            available PDF tools.
+            available calculator tools.
           </p>
           <Link href="/">
             <Button className="bg-theme-600 hover:bg-theme-700 text-white px-8 py-6 text-lg h-auto">
