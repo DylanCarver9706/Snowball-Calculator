@@ -13,13 +13,14 @@ import {
 import { User } from "lucide-react";
 import SubscriptionModal from "./subscriptionModal";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function Navbar() {
   const { isSignedIn, isLoaded } = useUser();
   const { signOut } = useClerk();
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+  const router = useRouter();
   // Handler to close mobile menu when an item is clicked
   const handleMobileItemClick = () => {
     setMobileMenuOpen(false);
@@ -72,10 +73,13 @@ export function Navbar() {
                   </Button>
                 </Link>
                 <Button
-                  onClick={() => setShowSubscribeModal(true)}
+                  onClick={() => {
+                    // setShowSubscribeModal(true);
+                    router.push("/sign-up");
+                  }}
                   className="bg-theme-600 hover:bg-theme-700 text-white"
                 >
-                  Unlock Pro
+                  Sign Up
                 </Button>
               </div>
             )}
@@ -96,12 +100,12 @@ export function Navbar() {
                     >
                       <Link href="/profile">Profile</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem
+                    {/* <DropdownMenuItem
                       asChild
                       className="px-4 py-3 cursor-pointer text-black hover:bg-gray-100 focus:bg-gray-100 rounded-md transition-colors flex items-center justify-center no-underline"
                     >
                       <Link href="/subscription">Subscription</Link>
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                     <DropdownMenuItem
                       onClick={() => signOut()}
                       className="px-4 py-3 cursor-pointer text-theme-600 hover:text-theme-700 hover:bg-gray-100 focus:bg-gray-100 rounded-md transition-colors flex items-center justify-center"
@@ -144,12 +148,13 @@ export function Navbar() {
                   </Link>
                   <Button
                     onClick={() => {
-                      setShowSubscribeModal(true);
+                      // setShowSubscribeModal(true);
+                      router.push("/sign-up");
                       handleMobileItemClick();
                     }}
                     className="w-full bg-theme-600 hover:bg-theme-700 text-white justify-center text-center"
                   >
-                    Unlock Pro
+                    Sign Up
                   </Button>
                 </div>
               )}
@@ -164,14 +169,14 @@ export function Navbar() {
                       Profile
                     </Button>
                   </Link>
-                  <Link href="/subscription" onClick={handleMobileItemClick}>
+                  {/* <Link href="/subscription" onClick={handleMobileItemClick}>
                     <Button
                       variant="ghost"
                       className="w-full justify-center text-center"
                     >
                       Subscription
                     </Button>
-                  </Link>
+                  </Link> */}
                   <Button
                     variant="ghost"
                     className="w-full justify-center text-center text-theme-600"
