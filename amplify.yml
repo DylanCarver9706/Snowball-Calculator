@@ -1,24 +1,24 @@
 version: 1
 frontend:
-    phases:
-        preBuild:
-            commands:
-                - 'npm ci --cache .npm --prefer-offline'
-        build:
-            commands:
-                # Write private env vars (used server-side only)
-                - env | grep -e CLERK_SECRET_KEY -e STRIPE_SECRET_KEY -e POSTHOG_HOST >> .env.production
+  phases:
+    preBuild:
+      commands:
+        - "npm ci --cache .npm --prefer-offline"
+    build:
+      commands:
+        # Write private env vars (used server-side only)
+        - env | grep -e CLERK_SECRET_KEY -e STRIPE_SECRET_KEY >> .env.production
 
-                # Write public env vars (safe for client)
-                - env | grep -e NEXT_PUBLIC_ >> .env.production
-        
-                # Build the Next.js app
-                - npm run build
-    artifacts:
-        baseDirectory: .next
-        files:
-            - '**/*'
-    cache:
-        paths:
-            - '.next/cache/**/*'
-            - '.npm/**/*'
+        # Write public env vars (safe for client)
+        - env | grep -e NEXT_PUBLIC_ >> .env.production
+
+        # Build the Next.js app
+        - npm run build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - "**/*"
+  cache:
+    paths:
+      - ".next/cache/**/*"
+      - ".npm/**/*"
