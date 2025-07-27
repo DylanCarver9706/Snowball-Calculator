@@ -82,42 +82,19 @@ export function SnowballCalculator() {
     }
   };
 
-  const handleBillChange = (
-    index: number,
-    field: keyof Bill,
-    value: string | number
-  ) => {
-    setBills((prev) => {
-      const updated = [...prev];
-      updated[index] = {
-        ...updated[index],
-        [field]:
-          typeof value === "string" &&
-          (field === "interestRate" ||
-            field === "monthlyPayment" ||
-            field === "currentBalance")
-            ? Number(value)
-            : value,
-      };
-      return updated;
-    });
-  };
-
-  const handleAddBill = () => {
-    setBills((prev) => [...prev, getDefaultBill()]);
-  };
-
   // For editing mode
   const startEdit = () => {
     setEditBills(JSON.parse(JSON.stringify(bills)));
     setEditMonthlyContribution(monthlyContribution);
     setEditing(true);
   };
+
   const cancelEdit = () => {
     setEditBills(null);
     setEditMonthlyContribution(null);
     setEditing(false);
   };
+
   const saveEdit = async () => {
     if (editBills && editMonthlyContribution !== null) {
       const sortedEditBills = [...editBills].sort(
@@ -140,6 +117,7 @@ export function SnowballCalculator() {
     setEditMonthlyContribution(null);
     setEditing(false);
   };
+
   const handleEditBillChange = (
     index: number,
     field: keyof Bill,
@@ -161,17 +139,38 @@ export function SnowballCalculator() {
       return updated;
     });
   };
+
   const handleEditAddBill = () => {
     setEditBills((prev) => (prev ? [...prev, getDefaultBill()] : prev));
+  };
+
+  const handleEditDeleteBill = (index: number) => {
+    if (!editBills) return;
+
+    const debtToDelete = editBills[index];
+    const confirmed = confirm(
+      `Are you sure you want to delete "${debtToDelete.name}"? This action cannot be undone.`
+    );
+
+    if (confirmed) {
+      setEditBills((prev) => {
+        if (!prev) return prev;
+        const updated = [...prev];
+        updated.splice(index, 1);
+        return updated;
+      });
+    }
   };
 
   // Sort by balance (ascending) before calculation
   const sortedBills = [...bills].sort(
     (a, b) => a.currentBalance - b.currentBalance
   );
+
   const [calculation, setCalculation] = useState(() =>
     calculateSnowball(sortedBills, monthlyContribution)
   );
+
   const [maxMonths, setMaxMonths] = useState(() =>
     Math.max(...calculation.map((debt) => debt.months.length))
   );
@@ -242,6 +241,7 @@ export function SnowballCalculator() {
                 <TableHead className="w-24">Rate (%)</TableHead>
                 <TableHead className="w-20">Payment</TableHead>
                 <TableHead className="w-24">Balance</TableHead>
+                <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -304,6 +304,28 @@ export function SnowballCalculator() {
                           )
                         }
                       />
+                    </TableCell>
+                    <TableCell>
+                      <button
+                        onClick={() => handleEditDeleteBill(idx)}
+                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                        title="Delete debt"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M3 6h18"></path>
+                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        </svg>
+                      </button>
                     </TableCell>
                   </TableRow>
                 ))}
