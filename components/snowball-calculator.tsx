@@ -202,9 +202,11 @@ export function SnowballCalculator() {
             {editing ? (
               <Input
                 type="number"
+                step="1"
+                min="0"
                 value={editMonthlyContribution ?? monthlyContribution}
                 onChange={(e) =>
-                  setEditMonthlyContribution(Number(e.target.value))
+                  setEditMonthlyContribution(Math.floor(Number(e.target.value)))
                 }
                 className="w-48"
               />
@@ -333,118 +335,135 @@ export function SnowballCalculator() {
           </Table>
         </div>
       ) : (
-        <div className="overflow-x-auto bg-white/30 p-6 rounded-lg backdrop-blur-sm">
+        <div className="bg-white/30 p-6 rounded-lg backdrop-blur-sm">
           <TooltipProvider>
-            <Table className="table-fixed w-full border border-slate-200">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-24 border-r border-slate-200">
-                    Month
-                  </TableHead>
-                  {sortedBills.map((bill, idx) => (
-                    <TableHead
-                      key={idx}
-                      className={`w-56 text-center${
-                        idx !== sortedBills.length - 1
-                          ? " border-r border-slate-200"
-                          : ""
-                      }`}
+            <div className="relative overflow-auto max-h-[800px] max-w-full">
+              <table className="w-full table-fixed border border-slate-200">
+                <thead
+                  className="sticky top-0 bg-gray-200 z-10"
+                  style={{ top: "-1px" }}
+                >
+                  <tr className="border-b border-slate-200">
+                    <th
+                      className="sticky left-0 z-20 w-24 p-2 text-middle align-middle font-medium bg-gray-100 border-r border-slate-200"
+                      style={{ left: "-1px" }}
                     >
-                      <span className="font-bold">{bill.name}</span>
-                      <div className="flex flex-col gap-1 items-center">
-                        <div className="flex gap-1 items-center">
-                          <span className="text-xs">Rate:</span>
-                          <span className="text-xs">{bill.interestRate}%</span>
+                      Month
+                    </th>
+                    {sortedBills.map((bill, idx) => (
+                      <th
+                        key={idx}
+                        className={`w-64 p-2 text-center align-middle font-medium text-muted-foreground${
+                          idx !== sortedBills.length - 1
+                            ? " border-r border-slate-200"
+                            : ""
+                        }`}
+                      >
+                        <span className="font-bold">{bill.name}</span>
+                        <div className="flex flex-col gap-1 items-center">
+                          <div className="flex gap-1 items-center">
+                            <span className="text-xs">Rate:</span>
+                            <span className="text-xs">
+                              {bill.interestRate}%
+                            </span>
+                          </div>
+                          <div className="flex gap-1 items-center">
+                            <span className="text-xs">Payment:</span>
+                            <span className="text-xs">
+                              ${bill.monthlyPayment}/mo
+                            </span>
+                          </div>
+                          <div className="flex gap-1 items-center">
+                            <span className="text-xs">Balance:</span>
+                            <span className="text-xs">
+                              ${bill.currentBalance}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex gap-1 items-center">
-                          <span className="text-xs">Payment:</span>
-                          <span className="text-xs">
-                            ${bill.monthlyPayment}/mo
-                          </span>
-                        </div>
-                        <div className="flex gap-1 items-center">
-                          <span className="text-xs">Balance:</span>
-                          <span className="text-xs">
-                            ${bill.currentBalance}
-                          </span>
-                        </div>
-                      </div>
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {Array.from({ length: maxMonths }, (_, monthIndex) => (
-                  <TableRow key={monthIndex}>
-                    <TableCell className="w-40 font-medium border-r border-slate-200">
-                      Month {monthIndex + 1}
-                    </TableCell>
-                    {calculation.map((debt, idx) => {
-                      const monthData = debt.months[monthIndex];
-                      const payoffIdx = debt.months.findIndex(
-                        (m, idx) =>
-                          m.remainingBalance === 0 &&
-                          (idx === 0 ||
-                            debt.months[idx - 1].remainingBalance > 0)
-                      );
-                      const isSnowballed =
-                        payoffIdx !== -1 && monthIndex > payoffIdx;
-                      return (
-                        <TableCell
-                          key={idx}
-                          className={`w-72 text-center${
-                            idx !== calculation.length - 1
-                              ? " border-r border-slate-200"
-                              : ""
-                          } ${
-                            isSnowballed
-                              ? "bg-green-50 dark:bg-green-900/20"
-                              : ""
-                          }`}
-                        >
-                          {isSnowballed ? (
-                            <div className="text-green-600 dark:text-green-400 font-medium text-center">
-                              Snowballed
-                            </div>
-                          ) : monthData ? (
-                            <>
-                              <div className="font-medium flex items-center justify-center gap-1">
-                                Pay: ${monthData.payment.toFixed(2)}
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="cursor-pointer text-gray-400 align-middle">
-                                      ℹ️
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="max-w-xs text-xs text-left">
-                                    {monthData.info}
-                                  </TooltipContent>
-                                </Tooltip>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: maxMonths }, (_, monthIndex) => (
+                    <tr
+                      key={monthIndex}
+                      className="border-b border-slate-200 hover:bg-muted/50"
+                    >
+                      <td
+                        className="sticky text-center align-middle left-0 z-10 w-64 p-2 font-medium bg-gray-100 border-r border-slate-100"
+                        style={{ left: "-1px" }}
+                      >
+                        Month {monthIndex + 1}
+                      </td>
+                      {calculation.map((debt, idx) => {
+                        const monthData = debt.months[monthIndex];
+                        const payoffIdx = debt.months.findIndex(
+                          (m, idx) =>
+                            m.remainingBalance === 0 &&
+                            (idx === 0 ||
+                              debt.months[idx - 1].remainingBalance > 0)
+                        );
+                        const isSnowballed =
+                          payoffIdx !== -1 && monthIndex > payoffIdx;
+                        return (
+                          <td
+                            key={idx}
+                            className={`w-48 p-2 text-center${
+                              idx !== calculation.length - 1
+                                ? " border-r border-slate-200"
+                                : ""
+                            } ${
+                              isSnowballed
+                                ? "bg-green-50 dark:bg-green-900/20"
+                                : ""
+                            }`}
+                          >
+                            {isSnowballed ? (
+                              <div className="text-black-100 dark:text-green-black font-medium text-center">
+                                Snowballed
                               </div>
-                              <div className="text-sm text-gray-500">
-                                Balance Remaining: $
-                                {monthData.remainingBalance.toFixed(2)}
-                              </div>
-                              <div className="text-xs text-gray-400">
-                                Principal: ${monthData.principalPaid.toFixed(2)}
-                              </div>
-                              <div className="text-xs text-gray-400">
-                                Interest: ${monthData.interestPaid.toFixed(2)}
-                              </div>
-                              {monthData.rollover > 0 && (
-                                <div className="text-xs text-orange-500 font-semibold">
-                                  Rollover: ${monthData.rollover.toFixed(2)}
+                            ) : monthData ? (
+                              <>
+                                <div className="font-medium flex items-center justify-center gap-1">
+                                  Pay: ${monthData.payment.toFixed(2)}
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="cursor-pointer text-gray-400 align-middle">
+                                        ℹ️
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="max-w-xs text-xs text-left">
+                                      {monthData.info}
+                                    </TooltipContent>
+                                  </Tooltip>
                                 </div>
-                              )}
-                            </>
-                          ) : null}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                                <div className="text-sm text-gray-500">
+                                  Balance Remaining: $
+                                  {monthData.remainingBalance.toFixed(2)}
+                                </div>
+                                <div className="text-xs text-gray-400">
+                                  Principal: $
+                                  {monthData.principalPaid.toFixed(2)}
+                                </div>
+                                <div className="text-xs text-gray-400">
+                                  Interest: ${monthData.interestPaid.toFixed(2)}
+                                </div>
+                                {monthData.rollover > 0 && (
+                                  <div className="text-xs text-orange-500 font-semibold">
+                                    Rollover: ${monthData.rollover.toFixed(2)}
+                                  </div>
+                                )}
+                              </>
+                            ) : null}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </TooltipProvider>
         </div>
       )}
