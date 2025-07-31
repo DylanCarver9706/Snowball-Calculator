@@ -192,9 +192,9 @@ export function SnowballCalculator() {
   }
 
   return (
-    <div className="w-full">
-      <div className="mb-8 bg-white/30 p-6 rounded-lg backdrop-blur-sm">
-        <div className="flex items-center gap-4">
+    <div className="w-full px-2 sm:px-0">
+      <div className="mb-8 bg-white/30 p-4 sm:p-6 rounded-lg backdrop-blur-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">
               Monthly Extra Payment
@@ -208,42 +208,36 @@ export function SnowballCalculator() {
                 onChange={(e) =>
                   setEditMonthlyContribution(Math.floor(Number(e.target.value)))
                 }
-                className="w-48"
+                className="w-full sm:w-48"
               />
             ) : (
               <span className="text-lg">${monthlyContribution}</span>
             )}
           </div>
           {editing ? (
-            <>
-              <Button onClick={saveEdit} className="ml-4">
-                Save
-              </Button>
-              <Button onClick={cancelEdit} className="ml-2" variant="secondary">
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={saveEdit}>Save</Button>
+              <Button onClick={cancelEdit} variant="secondary">
                 Cancel
               </Button>
-              <Button onClick={handleEditAddBill} className="ml-2">
-                + Add Debt
-              </Button>
-            </>
+              <Button onClick={handleEditAddBill}>+ Add Debt</Button>
+            </div>
           ) : (
-            <Button onClick={startEdit} className="ml-4">
-              Edit
-            </Button>
+            <Button onClick={startEdit}>Edit</Button>
           )}
         </div>
       </div>
 
       {editing ? (
-        <div className="overflow-x-auto bg-white/30 p-6 rounded-lg backdrop-blur-sm">
-          <Table className="table-auto w-full">
+        <div className="overflow-x-auto bg-white/30 p-4 sm:p-6 rounded-lg backdrop-blur-sm">
+          <Table className="table-auto w-full min-w-[600px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-48">Debt Name</TableHead>
-                <TableHead className="w-24">Rate (%)</TableHead>
-                <TableHead className="w-20">Payment</TableHead>
-                <TableHead className="w-24">Balance</TableHead>
-                <TableHead className="w-12"></TableHead>
+                <TableHead className="w-32 sm:w-48">Debt Name</TableHead>
+                <TableHead className="w-16 sm:w-24">Rate (%)</TableHead>
+                <TableHead className="w-16 sm:w-20">Payment</TableHead>
+                <TableHead className="w-20 sm:w-24">Balance</TableHead>
+                <TableHead className="w-8 sm:w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -252,7 +246,7 @@ export function SnowballCalculator() {
                   <TableRow key={idx}>
                     <TableCell>
                       <Input
-                        className="w-full max-w-xs font-bold text-center"
+                        className="w-full text-xs sm:text-sm font-bold text-center"
                         value={bill.name}
                         onChange={(e) =>
                           handleEditBillChange(idx, "name", e.target.value)
@@ -262,7 +256,7 @@ export function SnowballCalculator() {
                     <TableCell>
                       <Input
                         type="number"
-                        className="w-full max-w-[5rem] text-center"
+                        className="w-full text-xs sm:text-sm text-center"
                         value={bill.interestRate}
                         min={0}
                         step={0.01}
@@ -278,7 +272,7 @@ export function SnowballCalculator() {
                     <TableCell>
                       <Input
                         type="number"
-                        className="w-full max-w-[5rem] text-center"
+                        className="w-full text-xs sm:text-sm text-center"
                         value={bill.monthlyPayment}
                         min={0}
                         step={1}
@@ -294,7 +288,7 @@ export function SnowballCalculator() {
                     <TableCell>
                       <Input
                         type="number"
-                        className="w-full max-w-[7rem] text-center"
+                        className="w-full text-xs sm:text-sm text-center"
                         value={bill.currentBalance}
                         min={0}
                         step={1}
@@ -310,12 +304,13 @@ export function SnowballCalculator() {
                     <TableCell>
                       <button
                         onClick={() => handleEditDeleteBill(idx)}
-                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                        className="p-1 sm:p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
                         title="Delete debt"
                       >
                         <svg
-                          width="16"
-                          height="16"
+                          width="12"
+                          height="12"
+                          className="sm:w-4 sm:h-4"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -335,17 +330,17 @@ export function SnowballCalculator() {
           </Table>
         </div>
       ) : (
-        <div className="bg-white/30 p-6 rounded-lg backdrop-blur-sm">
+        <div className="bg-white/30 p-4 sm:p-6 rounded-lg backdrop-blur-sm">
           <TooltipProvider>
             <div className="relative overflow-auto max-h-[800px] max-w-full">
-              <table className="w-full table-fixed border border-slate-200">
+              <table className="w-full table-fixed border border-slate-200 min-w-[600px]">
                 <thead
                   className="sticky top-0 bg-gray-200 z-10"
                   style={{ top: "-1px" }}
                 >
                   <tr className="border-b border-slate-200">
                     <th
-                      className="sticky left-0 z-20 w-24 p-2 text-middle align-middle font-medium bg-gray-100 border-r border-slate-200"
+                      className="sticky left-0 z-20 w-16 sm:w-24 p-1 sm:p-2 text-middle align-middle font-medium bg-gray-100 border-r border-slate-200 text-xs sm:text-sm"
                       style={{ left: "-1px" }}
                     >
                       Month
@@ -353,13 +348,15 @@ export function SnowballCalculator() {
                     {sortedBills.map((bill, idx) => (
                       <th
                         key={idx}
-                        className={`w-64 p-2 text-center align-middle font-medium text-muted-foreground${
+                        className={`w-48 sm:w-64 p-1 sm:p-2 text-center align-middle font-medium text-muted-foreground${
                           idx !== sortedBills.length - 1
                             ? " border-r border-slate-200"
                             : ""
                         }`}
                       >
-                        <span className="font-bold">{bill.name}</span>
+                        <span className="font-bold text-xs sm:text-sm">
+                          {bill.name}
+                        </span>
                         <div className="flex flex-col gap-1 items-center">
                           <div className="flex gap-1 items-center">
                             <span className="text-xs">Rate:</span>
@@ -391,7 +388,7 @@ export function SnowballCalculator() {
                       className="border-b border-slate-200 hover:bg-muted/50"
                     >
                       <td
-                        className="sticky text-center align-middle left-0 z-10 w-64 p-2 font-medium bg-gray-100 border-r border-slate-100"
+                        className="sticky text-center align-middle left-0 z-10 w-16 sm:w-64 p-1 sm:p-2 font-medium bg-gray-100 border-r border-slate-100 text-xs sm:text-sm"
                         style={{ left: "-1px" }}
                       >
                         Month {monthIndex + 1}
@@ -409,7 +406,7 @@ export function SnowballCalculator() {
                         return (
                           <td
                             key={idx}
-                            className={`w-48 p-2 text-center${
+                            className={`w-48 sm:w-48 p-1 sm:p-2 text-center${
                               idx !== calculation.length - 1
                                 ? " border-r border-slate-200"
                                 : ""
@@ -425,11 +422,11 @@ export function SnowballCalculator() {
                               </div>
                             ) : monthData ? (
                               <>
-                                <div className="font-medium flex items-center justify-center gap-1">
+                                <div className="font-medium flex items-center justify-center gap-1 text-xs sm:text-sm">
                                   Pay: ${monthData.payment.toFixed(2)}
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <span className="cursor-pointer text-gray-400 align-middle">
+                                      <span className="cursor-pointer text-gray-400 align-middle text-xs">
                                         ℹ️
                                       </span>
                                     </TooltipTrigger>
@@ -438,8 +435,8 @@ export function SnowballCalculator() {
                                     </TooltipContent>
                                   </Tooltip>
                                 </div>
-                                <div className="text-sm text-gray-500">
-                                  Balance Remaining: $
+                                <div className="text-xs sm:text-sm text-gray-500">
+                                  Balance: $
                                   {monthData.remainingBalance.toFixed(2)}
                                 </div>
                                 <div className="text-xs text-gray-400">
